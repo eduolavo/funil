@@ -961,7 +961,7 @@ export default function InleadFunnel() {
                   addPoints(20)
                   setTimeout(() => goToStep(11), 500)
                 }}
-                className="w-full max-w-lg mx-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-6 px-10 text-lg font-bold rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="w-full max-w-lg mx-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 px-6 text-base font-bold rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-200"
               >
                 Quero receber o Script de Inícios Automáticos
               </Button>
@@ -1240,7 +1240,7 @@ export default function InleadFunnel() {
                   onClick={() => {
                     enableAudio()
                     playSound("success")
-                    window.open("https://pay.hotmart.com/Y22978658D?off=5le6e7pp&checkoutMode=10", "_blank")
+                    window.location.href = "https://pay.hotmart.com/Y22978658D?off=5le6e7pp&checkoutMode=10"
                   }}
                   className="w-full max-w-lg mx-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-6 px-8 text-xl font-bold rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-200 relative overflow-hidden min-h-[80px]"
                 >

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -43,57 +43,106 @@ export default function InleadFunnel() {
   const [audioEnabled, setAudioEnabled] = useState(false)
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null)
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)()
-      setAudioContext(context)
+      // Criar elemento de áudio HTML como fallback para mobile
+      const audio = new Audio("/sounds/cashier-quotka-chingquot-sound-effect-129698.mp3")
+      audio.preload = "auto"
+      audio.volume = 0.4
+      audioRef.current = audio
 
-      fetch("/sounds/cashier-quotka-chingquot-sound-effect-129698.mp3")
-        .then((response) => response.arrayBuffer())
-        .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
-        .then((decodedAudio) => setAudioBuffer(decodedAudio))
-        .catch((error) => console.error("Error preloading audio:", error))
+      // Tentar configurar Web Audio API para desktop
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)()
+        setAudioContext(context)
+
+        fetch("/sounds/cashier-quotka-chingquot-sound-effect-129698.mp3")
+          .then((response) => response.arrayBuffer())
+          .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
+          .then((decodedAudio) => setAudioBuffer(decodedAudio))
+          .catch((error) => console.error("Error preloading audio:", error))
+      } catch (error) {
+        console.error("Web Audio API not supported:", error)
+      }
     }
   }, [])
 
   const playSound = async (soundType: "levelUp" | "success" | "unlock" | "chaChing") => {
-    if (!audioEnabled || !audioContext || !audioBuffer) {
-      console.log("Áudio não habilitado, contexto não pronto ou buffer não carregado.")
+    if (!audioEnabled) {
+      console.log("Áudio não habilitado.")
       return
     }
 
     try {
-      if (audioContext.state === "suspended") {
-        await audioContext.resume()
+      // Tentar primeiro com Web Audio API
+      if (audioContext && audioBuffer && audioContext.state !== "suspended") {
+        const source = audioContext.createBufferSource()
+        source.buffer = audioBuffer
+
+        const gainNode = audioContext.createGain()
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime)
+
+        source.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        source.start(0)
+        console.log(`Som ${soundType} tocado com Web Audio API!`)
+        return
       }
+    } catch (error) {
+      console.error("Erro com Web Audio API:", error)
+    }
 
-      const source = audioContext.createBufferSource()
-      source.buffer = audioBuffer
+    // Fallback para HTML Audio (melhor para mobile)
+    try {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0
+        const playPromise = audioRef.current.play()
 
-      const gainNode = audioContext.createGain()
-      gainNode.gain.setValueAtTime(0.4, audioContext.currentTime)
-
-      source.connect(gainNode)
-      gainNode.connect(audioContext.destination)
-
-      source.start(0)
-      console.log(`Som ${soundType} tocado com sucesso!`)
+        if (playPromise !== undefined) {
+          await playPromise
+          console.log(`Som ${soundType} tocado com HTML Audio!`)
+        }
+      }
     } catch (error) {
       console.error(`Erro ao tocar som ${soundType}:`, error)
     }
   }
 
   const enableAudio = async () => {
-    if (!audioEnabled && audioContext) {
+    if (!audioEnabled) {
       try {
-        if (audioContext.state === "suspended") {
+        // Tentar habilitar Web Audio API
+        if (audioContext && audioContext.state === "suspended") {
           await audioContext.resume()
         }
+
+        // Tentar tocar um som silencioso para "destravar" o áudio no mobile
+        if (audioRef.current) {
+          audioRef.current.volume = 0
+          const playPromise = audioRef.current.play()
+          if (playPromise !== undefined) {
+            await playPromise
+            audioRef.current.pause()
+            audioRef.current.currentTime = 0
+            audioRef.current.volume = 0.4
+          }
+        }
+
         setAudioEnabled(true)
         console.log("Áudio habilitado!")
       } catch (error) {
         console.error("Erro ao habilitar áudio:", error)
+        setAudioEnabled(true) // Habilitar mesmo assim para tentar nos próximos cliques
       }
     }
   }
@@ -115,11 +164,14 @@ export default function InleadFunnel() {
     setTimeout(() => {
       setState((prev) => ({ ...prev, step: prev.step + 1 }))
       setIsAnimating(false)
+      // Scroll para o topo após avançar
+      setTimeout(() => scrollToTop(), 100)
     }, 500)
   }
 
   const goToStep = (step: number) => {
     setState((prev) => ({ ...prev, step }))
+    setTimeout(() => scrollToTop(), 100)
   }
 
   const handleOptionSelect = (key: string, value: string, nextStepNum?: number) => {
@@ -222,16 +274,10 @@ export default function InleadFunnel() {
               </div>
             </div>
 
-            {/* Main Title */}
+            {/* Main Title - REMOVIDA A ESTRELINHA */}
             <div className="space-y-4">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                Baixe Agora:{" "}
-                <span className="text-red-600 relative">
-                  O Script Gerador de Inícios
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-3 h-3 text-white" />
-                  </div>
-                </span>
+                Baixe Agora: <span className="text-red-600">O Script Gerador de Inícios</span>
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
                 Você está a poucas fases de destravar seus inícios e crescer absurdamente sua equipe a partir de hoje.
@@ -252,9 +298,6 @@ export default function InleadFunnel() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
                 {/* Floating elements */}
-                <div className="absolute top-2 left-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <Crown className="w-5 h-5 text-yellow-800" />
-                </div>
                 <div className="absolute bottom-2 right-2 w-10 h-10 bg-green-400 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                   <Zap className="w-5 h-5 text-green-800" />
                 </div>

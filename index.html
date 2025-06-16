@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Gerador de Inícios</title>
+    <meta name="description" content="Desbloqueie seus inícios e cresça sua equipe!">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.303.0/lucide.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <button id="back-btn" class="back-btn" style="display: none;">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                </button>
+                <div class="logo-container">
+                    <img src="scriptdeinicios-logo-pink-gradient.png" alt="Script de Inícios" class="logo">
+                </div>
+                <div id="points-display" class="points-display" style="display: none;">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                    </svg>
+                    <span id="points-value">0 pts</span>
+                </div>
+                <div class="spacer"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div id="step-content" class="step-content">
+                <!-- Step content will be dynamically inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="notification-dot"></div>
+        <span id="notification-text"></span>
+    </div>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container" class="confetti-container"></div>
+
+    <!-- Audio -->
+    <audio id="audio-element" preload="auto">
+        <source src="sounds/cashier-quotka-chingquot-sound-effect-129698.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -45,52 +45,6 @@ export default function InleadFunnel() {
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const [utmParams, setUtmParams] = useState<string>("")
-
-  useEffect(() => {
-    // Capturar UTMs da URL atual
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search)
-      const utms = new URLSearchParams()
-
-      // Capturar parâmetros UTM comuns
-      const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "src", "sck"]
-
-      utmKeys.forEach((key) => {
-        const value = urlParams.get(key)
-        if (value) {
-          utms.append(key, value)
-        }
-      })
-
-      // Também tentar capturar do localStorage se o Utmify salvou lá
-      try {
-        const utmifyData = localStorage.getItem("utmify_data")
-        if (utmifyData) {
-          const parsed = JSON.parse(utmifyData)
-          if (parsed.utm_source) utms.append("utm_source", parsed.utm_source)
-          if (parsed.utm_medium) utms.append("utm_medium", parsed.utm_medium)
-          if (parsed.utm_campaign) utms.append("utm_campaign", parsed.utm_campaign)
-          if (parsed.utm_content) utms.append("utm_content", parsed.utm_content)
-          if (parsed.utm_term) utms.append("utm_term", parsed.utm_term)
-          if (parsed.src) utms.append("src", parsed.src)
-          if (parsed.sck) utms.append("sck", parsed.sck)
-        }
-      } catch (error) {
-        console.log("Erro ao capturar UTMs do localStorage:", error)
-      }
-
-      setUtmParams(utms.toString())
-    }
-  }, [])
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    })
-  }
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Criar elemento de áudio HTML como fallback para mobile
@@ -114,6 +68,13 @@ export default function InleadFunnel() {
       }
     }
   }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
 
   const playSound = async (soundType: "levelUp" | "success" | "unlock" | "chaChing") => {
     if (!audioEnabled) {
@@ -1279,15 +1240,8 @@ export default function InleadFunnel() {
                   onClick={() => {
                     enableAudio()
                     playSound("success")
-
-                    // Construir URL com UTMs preservadas
-                    let hotmartUrl = "https://pay.hotmart.com/Y22978658D?off=5le6e7pp&checkoutMode=10"
-
-                    if (utmParams) {
-                      hotmartUrl += "&" + utmParams
-                    }
-
-                    window.location.href = hotmartUrl
+                    window.location.href =
+                      "https://pay.hotmart.com/Y22978658D?off=5le6e7pp&checkoutMode=10" + window.location.search
                   }}
                   className="w-full max-w-lg mx-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-6 px-8 text-xl font-bold rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-200 relative overflow-hidden min-h-[80px]"
                 >
